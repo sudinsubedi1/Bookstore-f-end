@@ -6,13 +6,19 @@ import "slick-carousel/slick/slick-theme.css";
 import axios from "axios";
 
 import Cards from "./Cards";
+
 function Freebook() {
   const [book, setBook] = useState([]);
+
+  // ✅ Use environment variable for backend
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+
   useEffect(() => {
     const getBook = async () => {
       try {
-        const res = await axios.get("http://localhost:4001/book");
+        const res = await axios.get(`${BASE_URL}/book`);
 
+        // Filter free books
         const data = res.data.filter((data) => data.category === "Free");
         console.log(data);
         setBook(data);
@@ -21,7 +27,7 @@ function Freebook() {
       }
     };
     getBook();
-  }, []);
+  }, [BASE_URL]);
 
   var settings = {
     dots: true,
@@ -57,28 +63,27 @@ function Freebook() {
       },
     ],
   };
+
   return (
     <>
-   
-    
-      <div className=" max-w-screen-10xl cursor-pointer container mx-auto md:px-20 px-4">
+      <div className="max-w-screen-10xl cursor-pointer container mx-auto md:px-20 px-4">
         <div>
           <h1 className="font-bold text-cyan-400 text-3xl pb-2">Free Offered Courses</h1>
           <p className="font-semibold"> 
-            You can enjoy free books from this section. (If you want premium books than you can go to Course section)
+            You can enjoy free books from this section. (If you want premium books then you can go to the Course section)
           </p>
         </div>
         <br />
         <br />
 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-  {book.map((item) => (
-    <Cards item={item} key={item._id} />
-  ))}
-</div>
-
+          {book.map((item) => (
+            <Cards item={item} key={item._id} />
+          ))}
+        </div>
       </div>
     </>
   );
 }
+
 export default Freebook;

@@ -9,10 +9,13 @@ const BookDetailsPage = () => {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Base URL from environment variable
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const response = await fetch(`http://localhost:4001/book/${id}`);
+        const response = await fetch(`${BASE_URL}/book/${id}`);
         if (!response.ok) throw new Error("Failed to fetch book");
         const data = await response.json();
         setBook(data);
@@ -25,12 +28,12 @@ const BookDetailsPage = () => {
     };
 
     fetchBook();
-  }, [id]);
+  }, [id, BASE_URL]);
 
   const handleBack = () => {
-    (location.state?.from === "home") 
+    if (location.state?.from === "home") {
       navigate("/");
-   
+    }
   };
 
   const getStockColor = () => {
@@ -68,7 +71,7 @@ const BookDetailsPage = () => {
             <p className="mt-4 text-gray-700">{book.description}</p>
             <div className="mt-4 flex items-center justify-between">
               <span className="text-2xl font-bold text-green-600">${book.price}</span>
-                          <div className="badge badge-outline mt-2">{book.rating}</div>
+              <div className="badge badge-outline mt-2">{book.rating}</div>
 
               <div className="flex flex-col items-end">
                 <span className="text-sm text-gray-500 dark:text-gray-300 mb-1">Stock</span>

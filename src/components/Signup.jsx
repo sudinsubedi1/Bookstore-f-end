@@ -13,6 +13,9 @@ function Signup() {
     formState: { errors },
   } = useForm();
 
+  // ✅ Use environment variable for backend
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+
   const onSubmit = async (data) => {
     const userInfo = {
       fullname: data.fullname,
@@ -21,7 +24,7 @@ function Signup() {
     };
 
     try {
-      const res = await axios.post("http://localhost:4001/user/signup", userInfo);
+      const res = await axios.post(`${BASE_URL}/user/signup`, userInfo);
       if (res.data) {
         localStorage.setItem("Users", JSON.stringify(res.data.user));
         toast.success("ID created! Please login to proceed.", { duration: 5000 });

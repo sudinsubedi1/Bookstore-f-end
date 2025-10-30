@@ -11,17 +11,20 @@ function Course() {
   const location = useLocation();
   const [message, setMessage] = useState("");
 
+  // ✅ Use environment variable for backend URL
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+
   useEffect(() => {
     const getBook = async () => {
       try {
-        const res = await axios.get("http://localhost:4001/book");
+        const res = await axios.get(`${BASE_URL}/book`);
         setBook(res.data);
       } catch (error) {
         console.log(error);
       }
     };
     getBook();
-  }, []);
+  }, [BASE_URL]);
 
   const handlePremiumClick = () => {
     if (location.pathname === "/course") {

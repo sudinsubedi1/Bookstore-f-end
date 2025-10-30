@@ -5,6 +5,9 @@ import toast from "react-hot-toast";
 function Cards({ item }) {
   const navigate = useNavigate();
 
+  // ✅ Use environment variable for backend
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+
   const goToDetails = () => {
     navigate(`/book/${item._id}`);
   };
@@ -21,7 +24,7 @@ function Cards({ item }) {
 
       const userId = user._id;
 
-      const response = await fetch("http://localhost:4001/cart", {
+      const response = await fetch(`${BASE_URL}/cart`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,11 +62,11 @@ function Cards({ item }) {
             {item.title}
             <div className="badge badge-secondary">{item.category}</div>
           </h2>
-{item.sold && (
-  <div className="absolute top-2 left-2 px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-full shadow-md">
-    Item Sold: {item.sold}
-  </div>
-)}
+          {item.sold && (
+            <div className="absolute top-2 left-2 px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-full shadow-md">
+              Item Sold: {item.sold}
+            </div>
+          )}
 
           <p className="text-sm text-gray-600 dark:text-gray-300">by {item.author}</p>
           <div className="mt-3">

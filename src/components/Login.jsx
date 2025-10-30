@@ -13,6 +13,9 @@ function Login({ modalId = "my_modal_3" }) {
   const [successPopup, setSuccessPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // ✅ Use environment variable for backend
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+
   const onSubmit = async (data) => {
     const userInfo = {
       email: data.email,
@@ -20,7 +23,7 @@ function Login({ modalId = "my_modal_3" }) {
     };
 
     try {
-      const res = await axios.post("http://localhost:4001/user/login", userInfo);
+      const res = await axios.post(`${BASE_URL}/user/login`, userInfo);
 
       if (res.data) {
         // Save user in localStorage
