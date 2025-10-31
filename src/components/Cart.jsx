@@ -8,6 +8,10 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // ✅ Use environment variable for backend
+  const BASE_URL =
+    import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com";
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -18,30 +22,33 @@ const Cart = () => {
           return;
         }
 
-        const response = await fetch(`http://localhost:4001/cart/${user._id}`);
+        const response = await fetch(`${BASE_URL}/cart/${user._id}`);
         if (!response.ok) throw new Error("Failed to fetch cart");
 
         const data = await response.json();
         setCart(data);
       } catch (error) {
         console.error("Error fetching cart:", error);
+        toast.error("Failed to load cart");
       } finally {
         setLoading(false);
       }
     };
 
     fetchCart();
-  }, []);
+  }, [BASE_URL]);
 
   const handleIncrease = async (bookId) => {
     try {
       const user = JSON.parse(localStorage.getItem("Users"));
       if (!user || !user._id) return toast.error("User not found");
+
       const response = await fetch(
-        `http://localhost:4001/cart/increase/${bookId}?userId=${user._id}`,
+        `${BASE_URL}/cart/increase/${bookId}?userId=${user._id}`,
         { method: "PUT" }
       );
       if (!response.ok) throw new Error("Failed to increase quantity");
+
       const data = await response.json();
       setCart(data);
       toast.success("Quantity increased");
@@ -54,11 +61,13 @@ const Cart = () => {
     try {
       const user = JSON.parse(localStorage.getItem("Users"));
       if (!user || !user._id) return toast.error("User not found");
+
       const response = await fetch(
-        `http://localhost:4001/cart/decrease/${bookId}?userId=${user._id}`,
+        `${BASE_URL}/cart/decrease/${bookId}?userId=${user._id}`,
         { method: "PUT" }
       );
       if (!response.ok) throw new Error("Failed to decrease quantity");
+
       const data = await response.json();
       setCart(data);
       toast.success("Quantity decreased");
@@ -71,11 +80,13 @@ const Cart = () => {
     try {
       const user = JSON.parse(localStorage.getItem("Users"));
       if (!user || !user._id) return toast.error("User not found");
+
       const response = await fetch(
-        `http://localhost:4001/cart/remove/${bookId}?userId=${user._id}`,
+        `${BASE_URL}/cart/remove/${bookId}?userId=${user._id}`,
         { method: "DELETE" }
       );
       if (!response.ok) throw new Error("Failed to remove item");
+
       const data = await response.json();
       setCart(data);
       toast.success("Item removed from cart");
@@ -84,7 +95,12 @@ const Cart = () => {
     }
   };
 
-  if (loading) return <p className="text-center py-10">Loading cart...</p>;
+  if (loading)
+    return (
+      <p className="text-center py-10">
+        Loading cart, please wait...
+      </p>
+    );
 
   // EMPTY CART VIEW
   if (!cart || cart.items.length === 0)
@@ -92,7 +108,9 @@ const Cart = () => {
       <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
         <FaShoppingCart size={80} className="text-gray-400 mb-4" />
         <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-        <p className="text-gray-500 mb-6">Looks like you haven’t added any items to your cart yet.</p>
+        <p className="text-gray-500 mb-6">
+          Looks like you haven’t added any items to your cart yet.
+        </p>
         <button
           className="btn btn-primary"
           onClick={() => navigate("/")}
@@ -175,7 +193,7 @@ const Cart = () => {
       </div>
 
       <div className="flex justify-end mt-6">
-        <div className="bg-gray-100  dark:bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-sm text-right">
+        <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-sm text-right">
           <p className="text-lg font-semibold">Subtotal: ${totalPrice.toFixed(2)}</p>
           <p className="text-gray-500 dark:text-gray-300 mt-1">
             Taxes and shipping calculated at checkout
