@@ -20,6 +20,9 @@ function Adminui() {
   const [isAdmin, setIsAdmin] = useState(false);
   const token = localStorage.getItem("token");
 
+  // ✅ Use deployed backend URL
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com";
+
   // Check if user is admin
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("Users"));
@@ -35,12 +38,12 @@ function Adminui() {
   // Fetch books
   const fetchBooks = async () => {
     try {
-      const res = await axios.get("http://localhost:4001/book", {
+      const res = await axios.get(`${BASE_URL}/book`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBooks(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching books:", err);
     }
   };
 
@@ -58,17 +61,16 @@ function Adminui() {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:4001/admin/update-book/${editingId}`,
-          formData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await axios.put(`${BASE_URL}/admin/update-book/${editingId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setEditingId(null);
       } else {
-        await axios.post("http://localhost:4001/admin/add-book", formData, {
+        await axios.post(`${BASE_URL}/admin/add-book`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
+
       setFormData({
         title: "",
         author: "",
@@ -79,6 +81,7 @@ function Adminui() {
         stock: "",
         sold: "",
       });
+
       fetchBooks();
     } catch (err) {
       console.error(err);
@@ -103,7 +106,7 @@ function Adminui() {
   // Delete book
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:4001/admin/delete-book/${id}`, {
+      await axios.delete(`${BASE_URL}/admin/delete-book/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchBooks();
@@ -116,11 +119,9 @@ function Adminui() {
   const logoutAdmin = async () => {
     try {
       if (token) {
-        await axios.post(
-          "http://localhost:4001/user/logout",
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await axios.post(`${BASE_URL}/user/logout`, {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
       }
     } catch (err) {
       console.error(err);
@@ -131,7 +132,6 @@ function Adminui() {
     }
   };
 
-  // Manual logout button
   const handleLeaveAdmin = () => {
     logoutAdmin();
     navigate("/");
@@ -139,9 +139,7 @@ function Adminui() {
 
   // Auto logout on page leave/unmount
   useEffect(() => {
-    return () => {
-      logoutAdmin();
-    };
+    return () => logoutAdmin();
   }, []);
 
   if (!isAdmin) return null;
@@ -158,70 +156,26 @@ function Adminui() {
       </button>
 
       <form onSubmit={handleSubmit} className="mb-8 grid grid-cols-2 gap-4">
-        <input
-          type="text"
-          name="title"
-          placeholder="Title"
-          value={formData.title}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="text"
-          name="author"
-          placeholder="Author"
-          value={formData.author}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={formData.price}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="text"
-          name="description"
-          placeholder="Description"
-          value={formData.description}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="text"
-          name="category"
-          placeholder="Category"
-          value={formData.category}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="text"
-          name="image"
-          placeholder="Image URL/Base64"
-          value={formData.image}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="number"
-          name="stock"
-          placeholder="Stock"
-          value={formData.stock}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-        <input
-          type="number"
-          name="sold"
-          placeholder="Sold"
-          value={formData.sold}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
+        {[
+          { name: "title", type: "text", placeholder: "Title" },
+          { name: "author", type: "text", placeholder: "Author" },
+          { name: "price", type: "number", placeholder: "Price" },
+          { name: "description", type: "text", placeholder: "Description" },
+          { name: "category", type: "text", placeholder: "Category" },
+          { name: "image", type: "text", placeholder: "Image URL/Base64" },
+          { name: "stock", type: "number", placeholder: "Stock" },
+          { name: "sold", type: "number", placeholder: "Sold" },
+        ].map((field) => (
+          <input
+            key={field.name}
+            type={field.type}
+            name={field.name}
+            placeholder={field.placeholder}
+            value={formData[field.name]}
+            onChange={handleChange}
+            className="border p-2 rounded w-full"
+          />
+        ))}
         <button
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition col-span-2"
