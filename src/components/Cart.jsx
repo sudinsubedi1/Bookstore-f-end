@@ -1,99 +1,190 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaPlus, FaMinus, FaTrash, FaShoppingCart } from "react-icons/fa";
 import toast from "react-hot-toast";
 
-function Cards({ item }) {
+const Cart = () => {
+  const [cart, setCart] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Base URL from environment variable
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem("Users"));
+        if (!user) {
+          console.error("User not found in localStorage");
+          setLoading(false);
+          return;
+        }
 
-  const goToDetails = () => {
-    navigate(`/book/${item._id}`);
-  };
+        const response = await fetch(`http://localhost:4001/cart/${user._id}`);
+        if (!response.ok) throw new Error("Failed to fetch cart");
 
-  const handleAddToCart = async (e) => {
-    e.stopPropagation();
+        const data = await response.json();
+        setCart(data);
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchCart();
+  }, []);
+
+  const handleIncrease = async (bookId) => {
     try {
       const user = JSON.parse(localStorage.getItem("Users"));
-      if (!user) {
-        toast.error("Please log in first!");
-        return;
-      }
-
-      const userId = user._id;
-
-      const response = await fetch(`${BASE_URL}/cart`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, bookId: item._id, quantity: 1 }),
-      });
-
-      if (!response.ok) throw new Error("Failed to add to cart");
-
-      toast.success("Book added to cart!");
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      toast.error("Something went wrong while adding to cart.");
+      if (!user || !user._id) return toast.error("User not found");
+      const response = await fetch(
+        `http://localhost:4001/cart/increase/${bookId}?userId=${user._id}`,
+        { method: "PUT" }
+      );
+      if (!response.ok) throw new Error("Failed to increase quantity");
+      const data = await response.json();
+      setCart(data);
+      toast.success("Quantity increased");
+    } catch {
+      toast.error("Failed to increase quantity");
     }
   };
 
-  const getStockColor = () => {
-    if (item.stock > 15) return "bg-green-500";
-    if (item.stock > 5) return "bg-yellow-500";
-    return "bg-red-500";
+  const handleDecrease = async (bookId) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("Users"));
+      if (!user || !user._id) return toast.error("User not found");
+      const response = await fetch(
+        `http://localhost:4001/cart/decrease/${bookId}?userId=${user._id}`,
+        { method: "PUT" }
+      );
+      if (!response.ok) throw new Error("Failed to decrease quantity");
+      const data = await response.json();
+      setCart(data);
+      toast.success("Quantity decreased");
+    } catch {
+      toast.error("Failed to decrease quantity");
+    }
   };
 
-  return (
-    <div onClick={goToDetails} className="mt-4 my-3 p-3">
-      <div className="card w-full bg-base-100 shadow-xl hover:scale-105 duration-200 dark:bg-slate-900 dark:text-white dark:border flex flex-col">
-        <figure className="h-60 flex items-center justify-center overflow-hidden">
-          <img
-            src={item.image || "https://via.placeholder.com/150"}
-            alt={item.title}
-            className="object-contain h-full w-full"
-          />
-        </figure>
-        <div className="card-body flex flex-col justify-between">
-          <h2 className="card-title flex justify-between items-start">
-            {item.title}
-            <div className="badge badge-secondary">{item.category}</div>
-          </h2>
-          {item.sold && (
-            <div className="absolute top-2 left-2 px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-full shadow-md">
-              Item Sold: {item.sold}
-            </div>
-          )}
+  const handleRemove = async (bookId) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("Users"));
+      if (!user || !user._id) return toast.error("User not found");
+      const response = await fetch(
+        `http://localhost:4001/cart/remove/${bookId}?userId=${user._id}`,
+        { method: "DELETE" }
+      );
+      if (!response.ok) throw new Error("Failed to remove item");
+      const data = await response.json();
+      setCart(data);
+      toast.success("Item removed from cart");
+    } catch {
+      toast.error("Failed to remove item");
+    }
+  };
 
-          <p className="text-sm text-gray-600 dark:text-gray-300">by {item.author}</p>
-          <div className="mt-3">
-            <div className="flex justify-between items-center mb-1 text-sm">
-              <span>Stock</span>
-              <span>{item.stock}</span>
-            </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
-              <div
-                className={`${getStockColor()} h-2 rounded-full`}
-                style={{ width: `${Math.min((item.stock / 20) * 100, 100)}%` }}
-              ></div>
-            </div>
-          </div>
-          <div className="card-actions justify-between mt-4">
-            <div className="badge badge-outline">${item.price}</div>
-            <div
-              onClick={handleAddToCart}
-              className="cursor-pointer px-3 py-1 rounded-full border-[2px] hover:bg-pink-500 hover:text-white duration-200"
-            >
-              Add to Cart
-            </div>
-          </div>
+  if (loading) return <p className="text-center py-10">Loading cart...</p>;
+
+  // EMPTY CART VIEW
+  if (!cart || cart.items.length === 0)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+        <FaShoppingCart size={80} className="text-gray-400 mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
+        <p className="text-gray-500 mb-6">Looks like you haven’t added any items to your cart yet.</p>
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate("/")}
+        >
+          Continue Shopping
+        </button>
+      </div>
+    );
+
+  const totalPrice = cart.items.reduce(
+    (total, item) => total + item.bookId.price * item.quantity,
+    0
+  );
+
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+      {/* Back Button */}
+      <button
+        className="btn btn-outline mb-6"
+        onClick={() => navigate("/")}
+      >
+        ← Back to Home
+      </button>
+
+      <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
+
+      <div className="overflow-x-auto shadow-lg rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-100 dark:bg-gray-800">
+            <tr>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Product</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Price</th>
+              <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Quantity</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Total</th>
+              <th className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+            {cart.items.map((item) => (
+              <tr key={item._id}>
+                <td className="px-6 py-4 flex items-center gap-4">
+                  <img
+                    src={item.bookId.image}
+                    alt={item.bookId.title}
+                    className="w-20 h-20 rounded object-cover"
+                  />
+                  <span className="font-medium">{item.bookId.title}</span>
+                </td>
+                <td className="px-6 py-4">${item.bookId.price.toFixed(2)}</td>
+                <td className="px-6 py-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      className="btn btn-sm btn-outline"
+                      onClick={() => handleDecrease(item.bookId._id)}
+                    >
+                      <FaMinus />
+                    </button>
+                    <span className="mx-2">{item.quantity}</span>
+                    <button
+                      className="btn btn-sm btn-outline"
+                      onClick={() => handleIncrease(item.bookId._id)}
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
+                </td>
+                <td className="px-6 py-4">${(item.bookId.price * item.quantity).toFixed(2)}</td>
+                <td className="px-6 py-4 text-center">
+                  <button
+                    className="btn btn-sm btn-error"
+                    onClick={() => handleRemove(item.bookId._id)}
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex justify-end mt-6">
+        <div className="bg-gray-100  dark:bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-sm text-right">
+          <p className="text-lg font-semibold">Subtotal: ${totalPrice.toFixed(2)}</p>
+          <p className="text-gray-500 dark:text-gray-300 mt-1">
+            Taxes and shipping calculated at checkout
+          </p>
+          <button className="btn btn-primary mt-4 w-full">Proceed to Checkout</button>
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default Cards;
+export default Cart;

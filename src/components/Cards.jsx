@@ -5,16 +5,16 @@ import toast from "react-hot-toast";
 function Cards({ item }) {
   const navigate = useNavigate();
 
-  // ✅ Use environment variable for backend
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+  if (!item) return null; // ✅ Prevent crash if item is undefined
+
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com";
 
   const goToDetails = () => {
-    navigate(`/book/${item._id}`);
+    if (item?._id) navigate(`/book/${item._id}`);
   };
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
-
     try {
       const user = JSON.parse(localStorage.getItem("Users"));
       if (!user) {
@@ -42,8 +42,8 @@ function Cards({ item }) {
   };
 
   const getStockColor = () => {
-    if (item.stock > 15) return "bg-green-500";
-    if (item.stock > 5) return "bg-yellow-500";
+    if ((item?.stock ?? 0) > 15) return "bg-green-500";
+    if ((item?.stock ?? 0) > 5) return "bg-yellow-500";
     return "bg-red-500";
   };
 
@@ -52,42 +52,46 @@ function Cards({ item }) {
       <div className="card w-full bg-base-100 shadow-xl hover:scale-105 duration-200 dark:bg-slate-900 dark:text-white dark:border flex flex-col">
         <figure className="h-60 flex items-center justify-center overflow-hidden">
           <img
-            src={item.image || "https://via.placeholder.com/150"}
-            alt={item.title}
+            src={item?.image || "https://via.placeholder.com/150"}
+            alt={item?.title || "Book"}
             className="object-contain h-full w-full"
           />
         </figure>
         <div className="card-body flex flex-col justify-between">
           <h2 className="card-title flex justify-between items-start">
-            {item.title}
-            <div className="badge badge-secondary">{item.category}</div>
+            {item?.title || "Untitled"}
+            <div className="badge badge-secondary">{item?.category || "N/A"}</div>
           </h2>
-          {item.sold && (
+          {item?.sold && (
             <div className="absolute top-2 left-2 px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-full shadow-md">
               Item Sold: {item.sold}
             </div>
           )}
 
-          <p className="text-sm text-gray-600 dark:text-gray-300">by {item.author}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">by {item?.author || "Unknown"}</p>
           <div className="mt-3">
             <div className="flex justify-between items-center mb-1 text-sm">
               <span>Stock</span>
-              <span>{item.stock}</span>
+              <span>{item?.stock ?? 0}</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
               <div
                 className={`${getStockColor()} h-2 rounded-full`}
-                style={{ width: `${Math.min((item.stock / 20) * 100, 100)}%` }}
+                style={{ width: `${Math.min(((item?.stock ?? 0) / 20) * 100, 100)}%` }}
               ></div>
             </div>
           </div>
           <div className="card-actions justify-between mt-4">
-            <div className="badge badge-outline">${item.price}</div>
+            <div className="badge badge-outline">${item?.price ?? 0}</div>
             <div
               onClick={handleAddToCart}
-              className="cursor-pointer px-3 py-1 rounded-full border-[2px] hover:bg-pink-500 hover:text-white duration-200"
+              className={`cursor-pointer px-3 py-1 rounded-full border-[2px] duration-200 ${
+                (item?.stock ?? 0) > 0
+                  ? "hover:bg-pink-500 hover:text-white"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
             >
-              Add to Cart
+              {(item?.stock ?? 0) > 0 ? "Add to Cart" : "Out of Stock"}
             </div>
           </div>
         </div>

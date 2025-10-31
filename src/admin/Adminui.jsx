@@ -20,9 +20,6 @@ function Adminui() {
   const [isAdmin, setIsAdmin] = useState(false);
   const token = localStorage.getItem("token");
 
-  // Base URL from environment variable
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
-
   // Check if user is admin
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("Users"));
@@ -38,7 +35,7 @@ function Adminui() {
   // Fetch books
   const fetchBooks = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/book`, {
+      const res = await axios.get("http://localhost:4001/book", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBooks(res.data);
@@ -62,13 +59,13 @@ function Adminui() {
     try {
       if (editingId) {
         await axios.put(
-          `${BASE_URL}/admin/update-book/${editingId}`,
+          `http://localhost:4001/admin/update-book/${editingId}`,
           formData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setEditingId(null);
       } else {
-        await axios.post(`${BASE_URL}/admin/add-book`, formData, {
+        await axios.post("http://localhost:4001/admin/add-book", formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -106,7 +103,7 @@ function Adminui() {
   // Delete book
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/admin/delete-book/${id}`, {
+      await axios.delete(`http://localhost:4001/admin/delete-book/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchBooks();
@@ -120,7 +117,7 @@ function Adminui() {
     try {
       if (token) {
         await axios.post(
-          `${BASE_URL}/user/logout`,
+          "http://localhost:4001/user/logout",
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );

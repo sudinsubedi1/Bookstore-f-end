@@ -7,12 +7,13 @@ function Course() {
   const [book, setBook] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("premium"); // default = premium
+  const [loading, setLoading] = useState(true); // Loading state
   const navigate = useNavigate();
   const location = useLocation();
   const [message, setMessage] = useState("");
 
   // ✅ Use environment variable for backend URL
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com";
 
   useEffect(() => {
     const getBook = async () => {
@@ -21,6 +22,8 @@ function Course() {
         setBook(res.data);
       } catch (error) {
         console.log(error);
+      } finally {
+        setLoading(false); // stop loading after fetch
       }
     };
     getBook();
@@ -140,11 +143,19 @@ function Course() {
           </select>
         </div>
 
-        {/* Books Grid */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-          {filteredBooks.map((item) => (
-            <Cards key={item._id} item={item} />
-          ))}
+        {/* Books Grid with small loader */}
+        <div className="mt-12">
+          {loading ? (
+            <p className="text-center text-lg text-gray-500">
+              Loading premium books, please wait...
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+              {filteredBooks.map((item) => (
+                <Cards key={item._id} item={item} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

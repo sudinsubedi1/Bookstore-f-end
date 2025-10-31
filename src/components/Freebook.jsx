@@ -9,21 +9,30 @@ import Cards from "./Cards";
 
 function Freebook() {
   const [book, setBook] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // ✅ Use environment variable for backend
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com";
 
   useEffect(() => {
     const getBook = async () => {
       try {
+        const startTime = Date.now();
+
         const res = await axios.get(`${BASE_URL}/book`);
 
         // Filter free books
         const data = res.data.filter((data) => data.category === "Free");
         console.log(data);
         setBook(data);
+
+        // Ensure loading shows at least 4 seconds
+        const elapsed = Date.now() - startTime;
+        const waitTime = Math.max(0, 4000 - elapsed);
+        setTimeout(() => setLoading(false), waitTime);
       } catch (error) {
         console.log(error); 
+        setLoading(false);
       }
     };
     getBook();
@@ -76,11 +85,15 @@ function Freebook() {
         <br />
         <br />
 
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {book.map((item) => (
-            <Cards item={item} key={item._id} />
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-center text-lg text-gray-500">Loading free books, please wait...</p>
+        ) : (
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {book.map((item) => (
+              <Cards item={item} key={item._id} />
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

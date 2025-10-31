@@ -14,7 +14,7 @@ function Signup() {
   } = useForm();
 
   // ✅ Use environment variable for backend
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com";
 
   const onSubmit = async (data) => {
     const userInfo = {

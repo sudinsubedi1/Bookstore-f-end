@@ -10,7 +10,7 @@ const BookDetailsPage = () => {
   const [loading, setLoading] = useState(true);
 
   // Base URL from environment variable
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com";
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -31,10 +31,9 @@ const BookDetailsPage = () => {
   }, [id, BASE_URL]);
 
   const handleBack = () => {
-    if (location.state?.from === "home") {
-      navigate("/");
-    }
-  };
+  navigate(-1);
+};
+
 
   const getStockColor = () => {
     if (book.stock > 15) return "bg-green-500";
