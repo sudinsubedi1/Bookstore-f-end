@@ -11,7 +11,7 @@ function Freebook() {
   const [book, setBook] = useState([]);
 
   // ✅ Use environment variable for backend
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
 
   useEffect(() => {
     const getBook = async () => {

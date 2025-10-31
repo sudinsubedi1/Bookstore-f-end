@@ -12,7 +12,7 @@ function Course() {
   const [message, setMessage] = useState("");
 
   // ✅ Use environment variable for backend URL
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
 
   useEffect(() => {
     const getBook = async () => {

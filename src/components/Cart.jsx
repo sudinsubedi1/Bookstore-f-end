@@ -6,7 +6,7 @@ function Cards({ item }) {
   const navigate = useNavigate();
 
   // Base URL from environment variable
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
 
   const goToDetails = () => {
     navigate(`/book/${item._id}`);

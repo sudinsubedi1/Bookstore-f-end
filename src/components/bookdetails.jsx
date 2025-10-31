@@ -10,7 +10,7 @@ const BookDetailsPage = () => {
   const [loading, setLoading] = useState(true);
 
   // Base URL from environment variable
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-online.onrender.com";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://bookstore-app-final.onrender.com/";
 
   useEffect(() => {
     const fetchBook = async () => {
