@@ -88,7 +88,7 @@ function Adminui() {
     }
   };
 
-  // Edit book
+  
   const handleEdit = (book) => {
     setFormData({
       title: book.title,
@@ -103,7 +103,6 @@ function Adminui() {
     setEditingId(book._id);
   };
 
-  // Delete book
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${BASE_URL}/admin/delete-book/${id}`, {
@@ -115,7 +114,6 @@ function Adminui() {
     }
   };
 
-  // Logout function
   const logoutAdmin = async () => {
     try {
       if (token) {
@@ -137,7 +135,6 @@ function Adminui() {
     navigate("/");
   };
 
-  // Auto logout on page leave/unmount
   useEffect(() => {
     return () => logoutAdmin();
   }, []);
